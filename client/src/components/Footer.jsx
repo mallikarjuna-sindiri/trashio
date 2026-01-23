@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthContext';
 
 export default function Footer() {
   const { user } = useAuth();
+  const baseUrl = import.meta.env.BASE_URL || '/';
 
   const roleLinks = {
     citizen: [
@@ -25,7 +26,7 @@ export default function Footer() {
       <div className="site-footer-inner">
         <div className="site-footer-left">
           <div className="site-footer-brand">
-            <img className="footer-logo" src="/image.png" alt="Trashio" />
+            <img className="footer-logo" src={`${baseUrl}image.png`} alt="Trashio" />
           </div>
           <p className="site-footer-copy">
             Trashio is a smart cleanliness reporting platform that helps citizens raise issues, allows admins to verify

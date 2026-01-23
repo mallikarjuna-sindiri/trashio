@@ -6,6 +6,7 @@ export default function NavBar() {
   const { user, logout } = useAuth();
   const [mode, setMode] = useState(() => localStorage.getItem('trashio_theme_mode') || 'dark');
   const [menuOpen, setMenuOpen] = useState(false);
+  const baseUrl = import.meta.env.BASE_URL || '/';
 
   useEffect(() => {
     document.documentElement.dataset.mode = mode;
@@ -24,7 +25,7 @@ export default function NavBar() {
     <header className={`nav${menuOpen ? ' nav-open' : ''}`}>
       <div className="nav-inner container">
         <Link className="brand brand-logo" to="/">
-          <img className="brand-img" src=".././public/image.png" alt="Trashio" />
+          <img className="brand-img" src={`${baseUrl}image.png`} alt="Trashio" />
           <span className="brand-text">Trashio</span>
           <span className="brand-dot" aria-hidden="true" />
         </Link>
@@ -73,7 +74,7 @@ export default function NavBar() {
           aria-label="Toggle navigation menu"
           aria-expanded={menuOpen}
         >
-          <img className="nav-toggle-icon" src=".././public/menu.png" alt="" aria-hidden="true" />
+          <img className="nav-toggle-icon" src={`${baseUrl}menu.png`} alt="" aria-hidden="true" />
         </button>
 
         <div className="nav-actions">
