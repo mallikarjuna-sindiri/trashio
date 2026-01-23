@@ -165,8 +165,8 @@ export default function CleanerDashboard() {
         <style>{`
           .cleaner-theme {
             background: linear-gradient(135deg, rgba(46, 125, 50, 0.03) 0%, rgba(27, 94, 32, 0.05) 100%);
-            min-height: calc(100vh - 80px);
-            padding: 20px 0;
+            min-height: auto;
+            padding: 20px 0 0;
           }
 
           .cleaner-header {

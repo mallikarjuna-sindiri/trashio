@@ -121,8 +121,8 @@ export default function CitizenDashboard() {
       <style>{`
         .citizen-theme {
           background: linear-gradient(135deg, rgba(25, 118, 210, 0.03) 0%, rgba(13, 71, 161, 0.05) 100%);
-          min-height: calc(100vh - 80px);
-          padding: 20px 0;
+          min-height: auto;
+          padding: 20px 0 0;
         }
         
         .dashboard-header {

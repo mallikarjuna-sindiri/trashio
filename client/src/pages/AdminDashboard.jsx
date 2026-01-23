@@ -342,8 +342,8 @@ export default function AdminDashboard() {
         background: radial-gradient(900px 500px at 10% 0%, rgba(239, 83, 80, 0.18), transparent 60%),
           radial-gradient(900px 500px at 90% 10%, rgba(198, 40, 40, 0.16), transparent 60%),
           #0f1419;
-        min-height: calc(100vh - 80px);
-        padding: 20px 0;
+        min-height: auto;
+        padding: 20px 0 0;
       }
       
       .admin-header {
