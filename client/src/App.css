@@ -1458,7 +1458,7 @@ textarea {
   gap: 8px;
   font-size: 0.9rem;
   white-space: nowrap;
-  justify-content: center;
+  justify-content: flex-start;
   width: auto;
   flex-direction: row;
 }
@@ -1472,6 +1472,6 @@ textarea {
 .pass-togg {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
 }
