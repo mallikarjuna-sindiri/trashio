@@ -1451,3 +1451,27 @@ textarea {
   border-color: var(--accent-strong);
   box-shadow: 0 0 0 3px var(--accent-tint);
 }
+
+.show-password-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  justify-content: center;
+  width: auto;
+  flex-direction: row;
+}
+
+.show-password-toggle input {
+  margin: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.pass-togg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}

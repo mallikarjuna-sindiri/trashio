@@ -33,7 +33,6 @@ export default function Register() {
         ? 'Field workers who clean reported locations and submit proof of completion.'
         : 'Residents who report garbage spots to keep neighborhoods clean and safe.';
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -256,38 +255,31 @@ export default function Register() {
                   required
                   disabled={role === 'admin'}
                 />
-                <button
-                  className="eye-btn"
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  aria-label="Toggle password visibility"
-                  disabled={role === 'admin'}
-                >
-                  {showPassword ? '🙈' : '👁️'}
-                </button>
               </div>
             </label>
             <label className="span-2">
               Confirm password
               <div className="input-eye">
                 <input
-                  type={showConfirm ? 'text' : 'password'}
+                  type={showPassword ? 'text' : 'password'}
                   value={form.confirm_password}
                   onChange={(e) => update('confirm_password', e.target.value)}
                   required
                   disabled={role === 'admin'}
                 />
-                <button
-                  className="eye-btn"
-                  type="button"
-                  onClick={() => setShowConfirm((v) => !v)}
-                  aria-label="Toggle confirm password visibility"
-                  disabled={role === 'admin'}
-                >
-                  {showConfirm ? '🙈' : '👁️'}
-                </button>
               </div>
             </label>
+            <div className="pass-togg">
+              <label className="span-2 show-password-toggle">
+                <input
+                  type="checkbox"
+                  checked={showPassword}
+                  onChange={(e) => setShowPassword(e.target.checked)}
+                  disabled={role === 'admin'}
+                />
+                Show password
+              </label>
+            </div>
 
             {err && <div className="error span-2">{err}</div>}
 
