@@ -36,7 +36,6 @@ export default function NavBar() {
           {!user && (
             <div className="nav-auth">
               <NavLink to="/login">Login</NavLink>
-              <span className="nav-or">or</span>
               <NavLink className="nav-signup" to="/register">Sign Up</NavLink>
             </div>
           )}
