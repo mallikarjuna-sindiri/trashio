@@ -15,6 +15,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminCreateUser from './pages/AdminCreateUser';
 import CleanerDashboard from './pages/CleanerDashboard';
 import Rewards from './pages/Rewards';
+import About from './pages/About';
 import NotFound from './pages/NotFound';
 
 import './App.css';
@@ -38,6 +39,7 @@ export default function App() {
       <main>
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/about" element={<About />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
 

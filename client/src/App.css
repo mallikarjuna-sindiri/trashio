@@ -1452,6 +1452,79 @@ textarea {
   box-shadow: 0 0 0 3px var(--accent-tint);
 }
 
+/* About page */
+.about-page {
+  padding: 24px 0 60px;
+}
+
+.about-hero {
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+.about-hero-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.about-title {
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  margin: 0;
+}
+
+.about-subtitle {
+  color: rgba(255, 255, 255, 0.78);
+  max-width: 680px;
+}
+
+.about-hero-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.about-card h3 {
+  margin-bottom: 8px;
+}
+
+.about-list {
+  margin: 0;
+  padding-left: 18px;
+  color: rgba(255, 255, 255, 0.78);
+  display: grid;
+  gap: 8px;
+}
+
+.about-values {
+  display: grid;
+  gap: 16px;
+}
+
+.about-values-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.about-value-title {
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+@media (max-width: 720px) {
+  .about-hero {
+    padding: 20px;
+  }
+}
+
 .show-password-toggle {
   display: inline-flex;
   align-items: center;

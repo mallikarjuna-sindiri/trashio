@@ -60,7 +60,7 @@ export default function Footer() {
           <div className="site-footer-col">
             <div className="site-footer-title">Explore</div>
             <Link to="/">Home</Link>
-            <Link to="/">About</Link>
+            <Link to="/about">About</Link>
             <a href="mailto:support@trashio.app">Support</a>
             <a href="mailto:trashio2025@gmail.com">Contact</a>
           </div>

@@ -31,7 +31,7 @@ export default function NavBar() {
         </Link>
         <nav className="links nav-links">
           <NavLink to="/">Home</NavLink>
-          <NavLink to="/#about">About</NavLink>
+          <NavLink to="/about">About</NavLink>
 
           {!user && (
             <div className="nav-auth">
@@ -91,7 +91,7 @@ export default function NavBar() {
           {!user && (
             <div className="nav-mobile-grid">
               <NavLink to="/" onClick={closeMenu}>Home</NavLink>
-              <NavLink to="/#about" onClick={closeMenu}>About</NavLink>
+              <NavLink to="/about" onClick={closeMenu}>About</NavLink>
               <NavLink to="/login" onClick={closeMenu}>Login</NavLink>
               <NavLink className="nav-signup" to="/register" onClick={closeMenu}>Sign Up</NavLink>
             </div>
