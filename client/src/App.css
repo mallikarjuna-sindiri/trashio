@@ -53,7 +53,10 @@
 }
 
 .nav-mobile-login {
-  display: none;
+  display: none !important;
+  padding: 1px 10px;
+  font-size: 0.85rem;
+  border-radius: 8px;
 }
 
 .nav-toggle {
@@ -187,7 +190,7 @@
   }
 
   .nav-mobile-login {
-    display: inline-flex;
+    display: inline-flex !important;
   }
 
   .nav .nav-toggle {
