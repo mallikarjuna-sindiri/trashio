@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from io import BytesIO
+from urllib.parse import urljoin
 from uuid import uuid4
 
-from fastapi import HTTPException, UploadFile, status
+from fastapi import HTTPException, Request, UploadFile, status
 from PIL import Image, ImageOps
 
 from app.core.config import settings
@@ -35,6 +36,27 @@ def validate_upload(file: UploadFile) -> None:
     # If needed later, enforce via reverse proxy limits + streaming.
     if settings.max_upload_mb <= 0:
         return
+
+
+def to_public_url(request: Request, path: str | None) -> str | None:
+    if not path:
+        return None
+    if path.startswith("http://") or path.startswith("https://"):
+        return path
+    base = str(request.base_url)
+    return urljoin(base, path.lstrip("/"))
+
+
+def apply_public_urls(request: Request, doc: dict) -> dict:
+    for key in (
+        "before_image_url",
+        "after_image_url",
+        "before_image_thumb_url",
+        "after_image_thumb_url",
+    ):
+        if key in doc:
+            doc[key] = to_public_url(request, doc.get(key))
+    return doc
 
 
 async def save_upload_with_thumbnail(file: UploadFile, prefix: str) -> tuple[str, str]:

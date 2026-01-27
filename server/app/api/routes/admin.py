@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel, Field, EmailStr
 
 from app.api.deps import DB, require_role
@@ -11,6 +11,7 @@ from app.core.security import hash_password
 from app.models.common import MongoModel
 from app.models.user import UserCreate, UserPublic, user_doc_from_create
 from app.models.report import ReportPublic, ReportStatus
+from app.utils.uploads import apply_public_urls
 
 router = APIRouter()
 
@@ -61,6 +62,7 @@ async def create_user(
 @router.get("/reports", response_model=list[ReportPublic])
 async def list_reports(
     status_filter: str | None = None,
+    request: Request,
     *,
     payload: dict = Depends(require_role("admin")),
     database: DB,
@@ -69,7 +71,7 @@ async def list_reports(
     if status_filter:
         query["status"] = status_filter
     cursor = database.reports.find(query).sort("created_at", -1)
-    return [ReportPublic(**doc) async for doc in cursor]
+    return [ReportPublic(**apply_public_urls(request, doc)) async for doc in cursor]
 
 
 @router.get("/cleaners", response_model=list[CleanerOption])
@@ -92,6 +94,7 @@ async def list_cleaners(
 async def verify_report(
     report_id: str,
     body: VerifyRequest,
+    request: Request,
     *,
     payload: dict = Depends(require_role("admin")),
     database: DB,
@@ -122,13 +125,14 @@ async def verify_report(
 
     await database.reports.update_one({"_id": rid}, update)
     updated = await database.reports.find_one({"_id": rid})
-    return ReportPublic(**updated)
+    return ReportPublic(**apply_public_urls(request, updated))
 
 
 @router.post("/reports/{report_id}/assign", response_model=ReportPublic)
 async def assign_cleaner(
     report_id: str,
     body: AssignRequest,
+    request: Request,
     *,
     payload: dict = Depends(require_role("admin")),
     database: DB,
@@ -164,13 +168,14 @@ async def assign_cleaner(
     )
 
     updated = await database.reports.find_one({"_id": rid})
-    return ReportPublic(**updated)
+    return ReportPublic(**apply_public_urls(request, updated))
 
 
 @router.post("/reports/{report_id}/verify-cleaning", response_model=ReportPublic)
 async def verify_cleaning(
     report_id: str,
     body: VerifyCleaningRequest,
+    request: Request,
     *,
     payload: dict = Depends(require_role("admin")),
     database: DB,
@@ -203,13 +208,14 @@ async def verify_cleaning(
 
     await database.reports.update_one({"_id": rid}, update)
     updated = await database.reports.find_one({"_id": rid})
-    return ReportPublic(**updated)
+    return ReportPublic(**apply_public_urls(request, updated))
 
 
 @router.patch("/reports/{report_id}/status", response_model=ReportPublic)
 async def update_report_status(
     report_id: str,
     body: UpdateStatusRequest,
+    request: Request,
     *,
     payload: dict = Depends(require_role("admin")),
     database: DB,
@@ -229,7 +235,7 @@ async def update_report_status(
 
     await database.reports.update_one({"_id": rid}, update)
     updated = await database.reports.find_one({"_id": rid})
-    return ReportPublic(**updated)
+    return ReportPublic(**apply_public_urls(request, updated))
 
 
 @router.delete("/reports/{report_id}", status_code=status.HTTP_204_NO_CONTENT)

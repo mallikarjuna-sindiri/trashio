@@ -3,11 +3,11 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Request, UploadFile
 
 from app.api.deps import DB, require_role
 from app.models.report import ReportPublic
-from app.utils.uploads import save_upload_with_thumbnail
+from app.utils.uploads import apply_public_urls, save_upload_with_thumbnail
 
 router = APIRouter()
 
@@ -16,6 +16,7 @@ router = APIRouter()
 async def upload_after_image(
     report_id: str,
     after_image: UploadFile = File(...),
+    request: Request,
     *,
     payload: dict = Depends(require_role("cleaner")),
     database: DB,
@@ -48,4 +49,4 @@ async def upload_after_image(
     )
 
     updated = await database.reports.find_one({"_id": rid})
-    return ReportPublic(**updated)
+    return ReportPublic(**apply_public_urls(request, updated))
