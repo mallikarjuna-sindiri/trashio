@@ -22,6 +22,18 @@ async def lifespan(app: FastAPI):
     close()
 
 
+class CacheControlStaticFiles(StaticFiles):
+    def __init__(self, *args, cache_control: str, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.cache_control = cache_control
+
+    async def get_response(self, path: str, scope):
+        response = await super().get_response(path, scope)
+        if response.status_code == 200:
+            response.headers["Cache-Control"] = self.cache_control
+        return response
+
+
 app = FastAPI(title="Trashio API", version="0.1.0", lifespan=lifespan)
 
 app.add_middleware(
@@ -32,6 +44,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.mount("/uploads", StaticFiles(directory=settings.upload_dir, check_dir=False), name="uploads")
+app.mount(
+    "/uploads",
+    CacheControlStaticFiles(
+        directory=settings.upload_dir,
+        check_dir=False,
+        cache_control="public, max-age=31536000, immutable",
+    ),
+    name="uploads",
+)
 
 app.include_router(api_router, prefix="/api")

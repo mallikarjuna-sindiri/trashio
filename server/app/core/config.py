@@ -26,6 +26,7 @@ class Settings(BaseSettings):
 
     upload_dir: str = "./uploads"
     max_upload_mb: int = 8
+    image_thumb_px: int = 640
 
     @property
     def cors_origins_list(self) -> list[str]:

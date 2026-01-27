@@ -26,6 +26,7 @@ class ReportPublic(MongoModel):
     location: GeoPoint
 
     before_image_url: str
+    before_image_thumb_url: str | None = None
 
     status: ReportStatus
     created_at: datetime
@@ -38,6 +39,7 @@ class ReportPublic(MongoModel):
     assigned_at: datetime | None = None
 
     after_image_url: str | None = None
+    after_image_thumb_url: str | None = None
     cleaned_at: datetime | None = None
 
     cleaning_verified_by_admin_id: PyObjectId | None = None
@@ -46,12 +48,18 @@ class ReportPublic(MongoModel):
     rejected_reason: str | None = None
 
 
-def report_doc_from_create(citizen_id: PyObjectId, payload: ReportCreate, before_url: str) -> dict:
+def report_doc_from_create(
+    citizen_id: PyObjectId,
+    payload: ReportCreate,
+    before_url: str,
+    before_thumb_url: str | None,
+) -> dict:
     return {
         "citizen_id": citizen_id,
         "description": payload.description,
         "location": payload.location.model_dump(),
         "before_image_url": before_url,
+        "before_image_thumb_url": before_thumb_url,
         "status": "Pending",
         "created_at": now_utc(),
         "verified_by_admin_id": None,
@@ -60,6 +68,7 @@ def report_doc_from_create(citizen_id: PyObjectId, payload: ReportCreate, before
         "assigned_by_admin_id": None,
         "assigned_at": None,
         "after_image_url": None,
+        "after_image_thumb_url": None,
         "cleaned_at": None,
         "cleaning_verified_by_admin_id": None,
         "cleaning_verified_at": None,

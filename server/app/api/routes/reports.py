@@ -1,15 +1,11 @@
 from __future__ import annotations
 
-import os
-from uuid import uuid4
-
 from bson import ObjectId
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 
 from app.api.deps import DB, require_role
-from app.core.config import settings
 from app.models.report import ReportCreate, ReportPublic, report_doc_from_create
-from app.utils.uploads import validate_upload
+from app.utils.uploads import save_upload_with_thumbnail
 
 router = APIRouter()
 
@@ -24,19 +20,10 @@ async def create_report(
     payload: dict = Depends(require_role("citizen")),
     database: DB,
 ):
-    validate_upload(before_image)
-
     citizen_id = ObjectId(payload["sub"])
-    filename = f"before_{uuid4().hex}_{before_image.filename}"
-    filepath = os.path.join(settings.upload_dir, filename)
-
-    contents = await before_image.read()
-    with open(filepath, "wb") as f:
-        f.write(contents)
-
-    before_url = f"/uploads/{filename}"
+    before_url, before_thumb_url = await save_upload_with_thumbnail(before_image, "before")
     report_payload = ReportCreate(description=description, location={"lat": lat, "lng": lng})
-    doc = report_doc_from_create(citizen_id, report_payload, before_url)
+    doc = report_doc_from_create(citizen_id, report_payload, before_url, before_thumb_url)
 
     result = await database.reports.insert_one(doc)
     created = await database.reports.find_one({"_id": result.inserted_id})
