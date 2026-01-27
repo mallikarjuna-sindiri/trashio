@@ -74,8 +74,14 @@ export default function ReportGarbage() {
         </div>
 
         <label>
-          Before Image
-          <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] || null)} required />
+          Before Photo (camera only)
+          <input
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            required
+          />
         </label>
 
         {err && <div className="error">{err}</div>}

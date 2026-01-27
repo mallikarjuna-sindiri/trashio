@@ -140,10 +140,11 @@ export default function CleanerDashboard() {
 
                     {r.status === 'Assigned' && (
                       <label className="btn filebtn">
-                        Upload After Proof
+                        Take After Photo
                         <input
                           type="file"
                           accept="image/*"
+                          capture="environment"
                           hidden
                           onChange={(e) => {
                             const f = e.target.files?.[0];

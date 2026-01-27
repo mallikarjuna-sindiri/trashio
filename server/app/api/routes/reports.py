@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 from bson import ObjectId
-from fastapi import APIRouter, Depends, File, Form, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 
 from app.api.deps import DB, require_role
 from app.models.report import ReportCreate, ReportPublic, report_doc_from_create
-from app.utils.uploads import apply_public_urls, save_upload_with_thumbnail
+from app.utils.uploads import save_upload_with_thumbnail
 
 router = APIRouter()
 
@@ -16,7 +16,6 @@ async def create_report(
     lat: float = Form(...),
     lng: float = Form(...),
     before_image: UploadFile = File(...),
-    request: Request,
     *,
     payload: dict = Depends(require_role("citizen")),
     database: DB,
@@ -28,28 +27,18 @@ async def create_report(
 
     result = await database.reports.insert_one(doc)
     created = await database.reports.find_one({"_id": result.inserted_id})
-    return ReportPublic(**apply_public_urls(request, created))
+    return ReportPublic(**created)
 
 
 @router.get("/my", response_model=list[ReportPublic])
-async def my_reports(
-    request: Request,
-    *,
-    payload: dict = Depends(require_role("citizen")),
-    database: DB,
-):
+async def my_reports(*, payload: dict = Depends(require_role("citizen")), database: DB):
     citizen_id = ObjectId(payload["sub"])
     cursor = database.reports.find({"citizen_id": citizen_id}).sort("created_at", -1)
-    return [ReportPublic(**apply_public_urls(request, doc)) async for doc in cursor]
+    return [ReportPublic(**doc) async for doc in cursor]
 
 
 @router.get("/assigned", response_model=list[ReportPublic])
-async def assigned_reports(
-    request: Request,
-    *,
-    payload: dict = Depends(require_role("cleaner")),
-    database: DB,
-):
+async def assigned_reports(*, payload: dict = Depends(require_role("cleaner")), database: DB):
     cleaner_id = ObjectId(payload["sub"])
     cursor = database.reports.find({"assigned_cleaner_id": cleaner_id}).sort("assigned_at", -1)
-    return [ReportPublic(**apply_public_urls(request, doc)) async for doc in cursor]
+    return [ReportPublic(**doc) async for doc in cursor]
