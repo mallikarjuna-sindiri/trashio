@@ -187,6 +187,9 @@ export default function Login() {
                   {showPassword ? 'Hide' : 'Show'}
                 </button>
               </div>
+              <div className="auth-help">
+                <Link to="/forgot-password">Forgot password?</Link>
+              </div>
             </label>
             {err && <div className="error">{err}</div>}
             <button className="btn primary" disabled={busy} type="submit">

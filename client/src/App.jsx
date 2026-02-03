@@ -8,6 +8,8 @@ import RequireAuth from './auth/RequireAuth';
 import Landing from './pages/Landing';
 import Register from './pages/Register';
 import Login from './pages/Login';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import CitizenDashboard from './pages/CitizenDashboard';
 import ReportGarbage from './pages/ReportGarbage';
 import MyReports from './pages/MyReports';
@@ -42,6 +44,8 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route
             path="/citizen"

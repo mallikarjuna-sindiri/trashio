@@ -15,6 +15,10 @@
 - `JWT_ALGORITHM` (default: `HS256`)
 - `ACCESS_TOKEN_EXPIRE_MINUTES` (default: `10080`)
 - `CORS_ORIGINS` (comma-separated list, e.g. `http://localhost:5173`)
+- `GOOGLE_CLIENT_ID` (Google OAuth client ID)
+- `RESET_PASSWORD_URL_BASE` (e.g. `http://localhost:5173/reset-password`)
+- `RESET_TOKEN_EXPIRE_MINUTES` (default: `30`)
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `SMTP_USE_TLS` (Gmail SMTP settings)
 
 ## Deploy (Render)
 - Build command: `pip install -r requirements.txt`

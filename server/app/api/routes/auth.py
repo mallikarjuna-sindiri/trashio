@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, HTTPException, status
+from bson import ObjectId
 from pydantic import BaseModel, EmailStr
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token as google_id_token
 
 from app.api.deps import DB
 from app.core.config import settings
-from app.core.security import create_access_token, hash_password, verify_password
+from app.core.security import create_access_token, create_reset_token, decode_reset_token, hash_password, verify_password
 from app.models.common import now_utc
 from app.models.user import Token, UserCreate, UserPublic, user_doc_from_create
+from app.utils.email import send_reset_email
 
 router = APIRouter()
 
@@ -22,6 +24,15 @@ class LoginRequest(BaseModel):
 class GoogleLoginRequest(BaseModel):
     id_token: str
     role: str | None = None
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str
+    password: str
 
 
 @router.post("/register", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
@@ -44,6 +55,12 @@ async def login(payload: LoginRequest, database: DB):
         raise HTTPException(status_code=401, detail="Invalid email or password")
     if not user.get("is_active", True):
         raise HTTPException(status_code=403, detail="User disabled")
+
+    if not user.get("password_hash"):
+        raise HTTPException(
+            status_code=401,
+            detail="Password login not set. Use Google sign-in or reset your password.",
+        )
 
     if not verify_password(payload.password, user.get("password_hash", "")):
         raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -106,3 +123,52 @@ async def google_login(payload: GoogleLoginRequest, database: DB):
 
     token = create_access_token(subject=str(user["_id"]), role=user["role"])
     return Token(access_token=token)
+
+
+@router.post("/forgot-password")
+async def forgot_password(payload: ForgotPasswordRequest, background_tasks: BackgroundTasks, database: DB):
+    user = await database.users.find_one({"email": payload.email.lower()})
+    if not user or not user.get("is_active", True):
+        return {"ok": True}
+
+    token = create_reset_token(subject=str(user["_id"]))
+    reset_base = settings.reset_password_url_base.split(",")[0].strip()
+    reset_link = f"{reset_base}?token={token}"
+
+    def _send():
+        send_reset_email(payload.email, reset_link)
+
+    background_tasks.add_task(_send)
+    return {"ok": True}
+
+
+@router.post("/reset-password")
+async def reset_password(payload: ResetPasswordRequest, database: DB):
+    if len(payload.password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters.")
+    if len(payload.password.encode("utf-8")) > 72:
+        raise HTTPException(status_code=400, detail="Password must be at most 72 bytes.")
+
+    try:
+        reset_payload = decode_reset_token(payload.token)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid or expired reset token")
+
+    user_id_raw = reset_payload.get("sub")
+    if not user_id_raw:
+        raise HTTPException(status_code=400, detail="Invalid reset token")
+
+    try:
+        user_id = ObjectId(user_id_raw)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid reset token")
+
+    password_hash = hash_password(payload.password)
+    result = await database.users.update_one(
+        {"_id": user_id},
+        {"$set": {"password_hash": password_hash}},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {"ok": True}
