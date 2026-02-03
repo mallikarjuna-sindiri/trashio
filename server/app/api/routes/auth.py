@@ -80,10 +80,10 @@ async def google_login(payload: GoogleLoginRequest, database: DB):
 
     if not user:
         requested_role = (payload.role or "citizen").lower()
-        if requested_role != "citizen":
+        if requested_role not in {"citizen", "cleaner"}:
             raise HTTPException(
                 status_code=400,
-                detail="Google sign-in only supports citizen accounts. Use email/password for cleaner/admin.",
+                detail="Google sign-in supports citizen and cleaner accounts. Use email/password for admin.",
             )
 
         full_name = idinfo.get("name") or idinfo.get("given_name") or "Google User"
@@ -91,7 +91,7 @@ async def google_login(payload: GoogleLoginRequest, database: DB):
             "full_name": full_name,
             "email": email,
             "phone": None,
-            "role": "citizen",
+            "role": requested_role,
             "address": None,
             "pincode": None,
             "password_hash": "",
