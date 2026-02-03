@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.core.security import create_access_token, create_reset_token, decode_reset_token, hash_password, verify_password
 from app.models.common import now_utc
 from app.models.user import Token, UserCreate, UserPublic, user_doc_from_create
-from app.utils.email import send_reset_email, send_welcome_email
+from app.utils.email import send_reset_email
 
 router = APIRouter()
 
@@ -36,7 +36,7 @@ class ResetPasswordRequest(BaseModel):
 
 
 @router.post("/register", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
-async def register(payload: UserCreate, background_tasks: BackgroundTasks, database: DB):
+async def register(payload: UserCreate, database: DB):
     existing = await database.users.find_one({"email": payload.email.lower()})
     if existing:
         raise HTTPException(status_code=409, detail="Email already registered")
@@ -45,18 +45,11 @@ async def register(payload: UserCreate, background_tasks: BackgroundTasks, datab
     doc = user_doc_from_create(payload, password_hash)
     result = await database.users.insert_one(doc)
     created = await database.users.find_one({"_id": result.inserted_id})
-
-    if settings.smtp_host and settings.smtp_from:
-        background_tasks.add_task(send_welcome_email, payload.email, payload.full_name, payload.role)
-        await database.users.update_one(
-            {"_id": result.inserted_id},
-            {"$set": {"welcome_email_sent": True, "welcome_email_sent_at": now_utc()}},
-        )
     return UserPublic(**created)
 
 
 @router.post("/login", response_model=Token)
-async def login(payload: LoginRequest, background_tasks: BackgroundTasks, database: DB):
+async def login(payload: LoginRequest, database: DB):
     user = await database.users.find_one({"email": payload.email.lower()})
     if not user:
         raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -72,24 +65,12 @@ async def login(payload: LoginRequest, background_tasks: BackgroundTasks, databa
     if not verify_password(payload.password, user.get("password_hash", "")):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    if settings.smtp_host and settings.smtp_from and not user.get("welcome_email_sent", False):
-        background_tasks.add_task(
-            send_welcome_email,
-            user.get("email", payload.email),
-            user.get("full_name"),
-            user.get("role"),
-        )
-        await database.users.update_one(
-            {"_id": user["_id"]},
-            {"$set": {"welcome_email_sent": True, "welcome_email_sent_at": now_utc()}},
-        )
-
     token = create_access_token(subject=str(user["_id"]), role=user["role"])
     return Token(access_token=token)
 
 
 @router.post("/google", response_model=Token)
-async def google_login(payload: GoogleLoginRequest, background_tasks: BackgroundTasks, database: DB):
+async def google_login(payload: GoogleLoginRequest, database: DB):
     if not settings.google_client_id:
         raise HTTPException(status_code=500, detail="Google OAuth not configured")
 
@@ -139,13 +120,6 @@ async def google_login(payload: GoogleLoginRequest, background_tasks: Background
 
     if not user.get("is_active", True):
         raise HTTPException(status_code=403, detail="User disabled")
-
-    if settings.smtp_host and settings.smtp_from and not user.get("welcome_email_sent", False):
-        background_tasks.add_task(send_welcome_email, user.get("email", email), user.get("full_name"), user.get("role"))
-        await database.users.update_one(
-            {"_id": user["_id"]},
-            {"$set": {"welcome_email_sent": True, "welcome_email_sent_at": now_utc()}},
-        )
 
     token = create_access_token(subject=str(user["_id"]), role=user["role"])
     return Token(access_token=token)

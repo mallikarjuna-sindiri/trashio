@@ -35,11 +35,11 @@ class Settings(BaseSettings):
 
     google_client_id: str | None = None
 
-    reset_token_expire_minutes: int = 30
+    reset_token_expire_minutes: int = 10
     reset_password_url_base: str = "http://localhost:5173/reset-password"
 
     smtp_host: str | None = None
-    smtp_port: int = 587
+    smtp_port: int = 587                                                                                                                                                                                                                                                                            
     smtp_user: str | None = None
     smtp_password: str | None = None
     smtp_from: str | None = None
