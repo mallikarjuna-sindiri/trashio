@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     citizen_reward_amount: float = 10.0
     cleaner_payment_amount: float = 20.0
 
+    google_client_id: str | None = None
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

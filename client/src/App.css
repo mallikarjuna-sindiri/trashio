@@ -1452,6 +1452,38 @@ textarea {
   box-shadow: 0 0 0 3px var(--accent-tint);
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.85rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.google-signin {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
+:root[data-mode='light'] .auth-divider {
+  color: rgba(15, 23, 42, 0.6);
+}
+
+:root[data-mode='light'] .auth-divider::before,
+:root[data-mode='light'] .auth-divider::after {
+  background: rgba(15, 23, 42, 0.14);
+}
+
 /* About page */
 .about-page {
   padding: 24px 0 60px;

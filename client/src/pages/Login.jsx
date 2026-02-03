@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { loginUser } from '../api/auth';
+import { loginUser, loginWithGoogle } from '../api/auth';
 import { useAuth } from '../auth/AuthContext';
 import { parseJwt } from '../utils/jwt';
 
@@ -12,12 +12,18 @@ export default function Login() {
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [googleReady, setGoogleReady] = useState(false);
+  const googleBtnRef = useRef(null);
+  const roleRef = useRef(form.role || 'citizen');
+  const googleInitRef = useRef(false);
 
   const roleHint = useMemo(() => {
     const r = params.get('role');
     if (r === 'admin' || r === 'cleaner' || r === 'citizen') return r;
     return null;
   }, [params]);
+
+  const role = form.role || roleHint || 'citizen';
 
   useEffect(() => {
     if (roleHint) {
@@ -26,7 +32,59 @@ export default function Login() {
     }
   }, [roleHint, setRoleHint]);
 
-  const role = form.role || roleHint || 'citizen';
+  useEffect(() => {
+    roleRef.current = role;
+  }, [role]);
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+    if (googleInitRef.current) return;
+
+    function initializeGoogle() {
+      if (!window.google?.accounts?.id) return;
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async (response) => {
+          try {
+            const token = await loginWithGoogle(response.credential, roleRef.current);
+            loginWithToken(token.access_token);
+            const decoded = parseJwt(token.access_token);
+            const userRole = decoded?.role;
+            if (userRole === 'admin') nav('/admin');
+            else if (userRole === 'cleaner') nav('/cleaner');
+            else nav('/citizen');
+          } catch (ex) {
+            setErr(ex?.response?.data?.detail || 'Google sign-in failed');
+          }
+        },
+      });
+      if (googleBtnRef.current) {
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
+          theme: 'outline',
+          size: 'large',
+          width: 320,
+        });
+        setGoogleReady(true);
+      }
+    }
+
+    if (window.google?.accounts?.id) {
+      initializeGoogle();
+      googleInitRef.current = true;
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = initializeGoogle;
+    script.onerror = () => setErr('Unable to load Google sign-in');
+    document.head.appendChild(script);
+    googleInitRef.current = true;
+  }, [loginWithToken, nav]);
+
   const heading = role === 'admin' ? 'Admin Login' : role === 'cleaner' ? 'Cleaner Login' : 'Citizen Login';
   const roleLabel = role === 'admin' ? 'Administrator' : role === 'cleaner' ? 'Cleaner' : 'Citizen';
   const roleImage = role === 'admin' ? '/canvas.png' : role === 'cleaner' ? '/trash.png' : '/citizen.webp';
@@ -134,6 +192,10 @@ export default function Login() {
             <button className="btn primary" disabled={busy} type="submit">
               {busy ? 'Signing in...' : 'Login'}
             </button>
+            <div className="auth-divider">
+              <span>or</span>
+            </div>
+            <div className="google-signin" ref={googleBtnRef} aria-hidden={!googleReady} />
             <div className="muted">
               New here? <Link to={role ? `/register?role=${role}` : '/register'}>Create account</Link>
             </div>

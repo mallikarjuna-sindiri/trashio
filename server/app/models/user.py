@@ -39,7 +39,7 @@ class UserCreate(BaseModel):
 class UserPublic(MongoModel):
     full_name: str
     email: EmailStr
-    phone: str
+    phone: str | None = None
     role: UserRole
     address: str | None = None
     pincode: str | None = None

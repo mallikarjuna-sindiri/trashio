@@ -2,9 +2,13 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr
+from google.auth.transport import requests as google_requests
+from google.oauth2 import id_token as google_id_token
 
 from app.api.deps import DB
+from app.core.config import settings
 from app.core.security import create_access_token, hash_password, verify_password
+from app.models.common import now_utc
 from app.models.user import Token, UserCreate, UserPublic, user_doc_from_create
 
 router = APIRouter()
@@ -13,6 +17,11 @@ router = APIRouter()
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+
+class GoogleLoginRequest(BaseModel):
+    id_token: str
+    role: str | None = None
 
 
 @router.post("/register", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
@@ -38,6 +47,62 @@ async def login(payload: LoginRequest, database: DB):
 
     if not verify_password(payload.password, user.get("password_hash", "")):
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    token = create_access_token(subject=str(user["_id"]), role=user["role"])
+    return Token(access_token=token)
+
+
+@router.post("/google", response_model=Token)
+async def google_login(payload: GoogleLoginRequest, database: DB):
+    if not settings.google_client_id:
+        raise HTTPException(status_code=500, detail="Google OAuth not configured")
+
+    try:
+        idinfo = google_id_token.verify_oauth2_token(
+            payload.id_token,
+            google_requests.Request(),
+            settings.google_client_id,
+        )
+    except Exception:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+
+    issuer = idinfo.get("iss")
+    if issuer not in {"accounts.google.com", "https://accounts.google.com"}:
+        raise HTTPException(status_code=401, detail="Invalid token issuer")
+
+    email = (idinfo.get("email") or "").lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="Google account email missing")
+    if not idinfo.get("email_verified", False):
+        raise HTTPException(status_code=400, detail="Google email not verified")
+
+    user = await database.users.find_one({"email": email})
+
+    if not user:
+        requested_role = (payload.role or "citizen").lower()
+        if requested_role != "citizen":
+            raise HTTPException(
+                status_code=400,
+                detail="Google sign-in only supports citizen accounts. Use email/password for cleaner/admin.",
+            )
+
+        full_name = idinfo.get("name") or idinfo.get("given_name") or "Google User"
+        doc = {
+            "full_name": full_name,
+            "email": email,
+            "phone": None,
+            "role": "citizen",
+            "address": None,
+            "pincode": None,
+            "password_hash": "",
+            "is_active": True,
+            "created_at": now_utc(),
+        }
+        result = await database.users.insert_one(doc)
+        user = await database.users.find_one({"_id": result.inserted_id})
+
+    if not user.get("is_active", True):
+        raise HTTPException(status_code=403, detail="User disabled")
 
     token = create_access_token(subject=str(user["_id"]), role=user["role"])
     return Token(access_token=token)
