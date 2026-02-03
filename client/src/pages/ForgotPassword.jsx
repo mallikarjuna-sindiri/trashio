@@ -23,15 +23,32 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="auth-page">
+    <div className="auth-page auth-page-forgot">
       <div className="container auth-shell">
         <section className="auth-hero">
           <div className="auth-hero-inner">
             <span className="role-pill">Password Help</span>
+            <div className="auth-hero-icon" aria-hidden="true">
+              🔐
+            </div>
             <h1 className="auth-title">Reset your password</h1>
             <p className="auth-desc">
               Enter your account email and we will send you a secure reset link.
             </p>
+            <div className="auth-steps">
+              <div className="auth-step">
+                <div className="auth-step-title">1. Enter your email</div>
+                <div className="auth-step-desc">Use the email you registered with.</div>
+              </div>
+              <div className="auth-step">
+                <div className="auth-step-title">2. Check your inbox</div>
+                <div className="auth-step-desc">We’ll send a secure reset link.</div>
+              </div>
+              <div className="auth-step">
+                <div className="auth-step-title">3. Set a new password</div>
+                <div className="auth-step-desc">Choose a strong password to finish.</div>
+              </div>
+            </div>
           </div>
         </section>
 

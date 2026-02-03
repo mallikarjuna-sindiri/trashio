@@ -233,20 +233,18 @@ export default function Register() {
           {role === 'admin' && (
             <div className="notice" role="status">
               Admin registration is managed internally. Please contact
-              <a href="mailto:trashio2025@gmail.com"> trashio2025@gmail.com</a> to request access.
+              <a href="mailto:trashio.official@gmail.com"> trashio.official@gmail.com</a> to request access.
             </div>
           )}
           <div className="auth-social">
-            {role === 'admin' ? (
-              <div className="notice" role="status">
-                Google sign-in supports citizen and cleaner accounts. Use email/password for admin access.
-              </div>
-            ) : (
-              <div className="google-signin" ref={googleBtnRef} aria-hidden={!googleReady} />
+            {role !== 'admin' && (
+              <>
+                <div className="google-signin" ref={googleBtnRef} aria-hidden={!googleReady} />
+                <div className="auth-divider">
+                  <span>or register with email</span>
+                </div>
+              </>
             )}
-            <div className="auth-divider">
-              <span>or register with email</span>
-            </div>
           </div>
 
           <form onSubmit={onSubmit} className="auth-form-grid">

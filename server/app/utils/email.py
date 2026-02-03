@@ -26,3 +26,34 @@ def send_reset_email(to_email: str, reset_link: str) -> None:
         if settings.smtp_user and settings.smtp_password:
             smtp.login(settings.smtp_user, settings.smtp_password)
         smtp.send_message(msg)
+
+
+def send_welcome_email(to_email: str, full_name: str | None, role: str | None) -> None:
+    if not settings.smtp_host or not settings.smtp_from:
+        raise RuntimeError("SMTP not configured")
+
+    display_name = full_name or "there"
+    role_label = (role or "citizen").capitalize()
+
+    msg = EmailMessage()
+    msg["Subject"] = "Welcome to Trashio"
+    msg["From"] = settings.smtp_from
+    msg["To"] = to_email
+    msg.set_content(
+        f"Hi {display_name},\n\n"
+        "Thanks for registering with Trashio! Here’s a quick overview of how the platform works:\n\n"
+        "1) Report garbage spots with a photo and location (citizens).\n"
+        "2) Track status updates as reports are reviewed and assigned.\n"
+        "3) Cleaners upload proof of completion, and admins verify closures.\n"
+        "4) Citizens earn rewards for verified reports.\n\n"
+        f"You’re signed up as a {role_label} user.\n\n"
+        "If you need help, just reply to this email.\n\n"
+        "— The Trashio Team"
+    )
+
+    with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as smtp:
+        if settings.smtp_use_tls:
+            smtp.starttls()
+        if settings.smtp_user and settings.smtp_password:
+            smtp.login(settings.smtp_user, settings.smtp_password)
+        smtp.send_message(msg)

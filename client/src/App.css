@@ -52,6 +52,11 @@
   gap: 10px;
 }
 
+.nav-theme-mobile {
+  display: none;
+  align-items: center;
+}
+
 .nav-mobile-login {
   display: none !important;
   padding: 1px 10px;
@@ -88,7 +93,64 @@
 }
 
 .theme-toggle {
-  min-width: 72px;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+
+.theme-toggle-track {
+  position: relative;
+  width: 46px;
+  height: 24px;
+  border-radius: 999px;
+  background: transparent;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+
+.theme-toggle-icon {
+  font-size: 0.72rem;
+  opacity: 0.8;
+}
+
+.theme-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.theme-toggle.light .theme-toggle-thumb {
+  transform: translateX(22px);
+}
+
+.theme-toggle-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.theme-toggle-label {
+  display: none;
+}
+
+:root[data-mode='light'] .theme-toggle-track {
+  background: transparent;
+  border-color: transparent;
+}
+
+:root[data-mode='light'] .theme-toggle-thumb {
+  background: #ffffff;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
 }
 
 .brand {
@@ -191,6 +253,19 @@
 
   .nav-mobile-login {
     display: inline-flex !important;
+  }
+
+  .nav-theme-mobile {
+    display: inline-flex;
+  }
+
+  .nav-theme-mobile .theme-toggle-label {
+    display: none;
+  }
+
+  .nav-theme-mobile .theme-toggle {
+    min-width: 0;
+    padding: 4px 8px;
   }
 
   .nav .nav-toggle {
@@ -751,6 +826,25 @@ textarea {
   border-color: rgba(15, 23, 42, 0.15);
 }
 
+:root[data-mode='light'] .auth-page-forgot .auth-hero-inner {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.6));
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+:root[data-mode='light'] .auth-hero-icon {
+  background: rgba(15, 23, 42, 0.06);
+  border-color: rgba(15, 23, 42, 0.14);
+}
+
+:root[data-mode='light'] .auth-step {
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+:root[data-mode='light'] .auth-step-desc {
+  color: rgba(15, 23, 42, 0.7);
+}
+
 :root[data-mode='light'] .metric {
   background: rgba(15, 23, 42, 0.04);
   border-color: rgba(15, 23, 42, 0.12);
@@ -1290,6 +1384,10 @@ textarea {
   align-items: stretch;
 }
 
+.auth-page-forgot .auth-hero {
+  min-height: 360px;
+}
+
 .auth-hero-inner {
   width: 100%;
   display: flex;
@@ -1299,6 +1397,44 @@ textarea {
   border-radius: 14px;
   background: rgba(7, 12, 18, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.auth-page-forgot .auth-hero-inner {
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.55), rgba(15, 23, 42, 0.18));
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.auth-hero-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  font-size: 1.7rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.auth-steps {
+  margin-top: 6px;
+  display: grid;
+  gap: 10px;
+}
+
+.auth-step {
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.auth-step-title {
+  font-weight: 700;
+}
+
+.auth-step-desc {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .role-pill {
@@ -1403,6 +1539,26 @@ textarea {
   width: min(60%, 260px);
   margin: 0 auto;
   display: block;
+}
+
+.auth-page-login .auth-form .muted {
+  margin-top: 12px;
+}
+
+.auth-page-login .auth-form .muted a {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+:root[data-mode='light'] .auth-page-login .auth-form .muted a {
+  color: rgba(15, 23, 42, 0.9);
+}
+
+.auth-page .auth-form .auth-form-grid .muted a {
+  color: rgba(255, 255, 255, 0.92);
+}
+
+:root[data-mode='light'] .auth-page .auth-form .auth-form-grid .muted a {
+  color: rgba(15, 23, 42, 0.9);
 }
 
 .auth-password-field {
@@ -1557,6 +1713,11 @@ textarea {
   color: rgba(255, 255, 255, 0.78);
   display: grid;
   gap: 8px;
+}
+
+:root[data-mode='light'] .about-subtitle,
+:root[data-mode='light'] .about-list {
+  color: rgba(15, 23, 42, 0.7);
 }
 
 .about-values {

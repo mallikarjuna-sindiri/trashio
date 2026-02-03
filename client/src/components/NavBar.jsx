@@ -66,6 +66,23 @@ export default function NavBar() {
           </NavLink>
         )}
 
+        <div className="nav-theme-mobile">
+          <button
+            className={`btn theme-toggle ${mode}`}
+            onClick={toggleMode}
+            type="button"
+            aria-label="Toggle theme"
+            aria-pressed={mode === 'light'}
+          >
+            <span className="theme-toggle-track" aria-hidden="true">
+              <span className="theme-toggle-icon theme-toggle-sun">☀️</span>
+              <span className="theme-toggle-icon theme-toggle-moon">🌙</span>
+              <span className="theme-toggle-thumb" />
+            </span>
+            <span className="theme-toggle-label">{mode === 'dark' ? 'Dark' : 'Light'}</span>
+          </button>
+        </div>
+
         <button
           className="btn nav-toggle"
           onClick={() => setMenuOpen((v) => !v)}
@@ -77,8 +94,19 @@ export default function NavBar() {
         </button>
 
         <div className="nav-actions">
-          <button className="btn theme-toggle" onClick={toggleMode} type="button" aria-label="Toggle theme">
-            {mode === 'dark' ? 'Light' : 'Dark'}
+          <button
+            className={`btn theme-toggle ${mode}`}
+            onClick={toggleMode}
+            type="button"
+            aria-label="Toggle theme"
+            aria-pressed={mode === 'light'}
+          >
+            <span className="theme-toggle-track" aria-hidden="true">
+              <span className="theme-toggle-icon theme-toggle-sun">☀️</span>
+              <span className="theme-toggle-icon theme-toggle-moon">🌙</span>
+              <span className="theme-toggle-thumb" />
+            </span>
+            <span className="theme-toggle-label">{mode === 'dark' ? 'Dark' : 'Light'}</span>
           </button>
           {user && (
             <button className="btn" onClick={logout} type="button">
@@ -117,14 +145,6 @@ export default function NavBar() {
           )}
 
           <div className="nav-mobile-actions">
-            <button
-              className="btn theme-toggle"
-              onClick={toggleMode}
-              type="button"
-              aria-label="Toggle theme"
-            >
-              {mode === 'dark' ? 'Light' : 'Dark'}
-            </button>
             {user && (
               <button
                 className="btn"
