@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { registerUser } from '../api/auth';
+import { loginWithGoogle, registerUser } from '../api/auth';
 import { useAuth } from '../auth/AuthContext';
+import { parseJwt } from '../utils/jwt';
 
 export default function Register() {
   const nav = useNavigate();
-  const { setRoleHint } = useAuth();
+  const { loginWithToken, setRoleHint } = useAuth();
   const [params] = useSearchParams();
   const roleHint = useMemo(() => {
     const r = params.get('role');
@@ -23,6 +24,9 @@ export default function Register() {
     role: 'citizen',
   });
   const pinRefs = useRef([]);
+  const googleBtnRef = useRef(null);
+  const googleInitRef = useRef(false);
+  const roleRef = useRef(form.role || 'citizen');
   const role = form.role || roleHint || 'citizen';
   const roleLabel = role === 'admin' ? 'Administrator' : role === 'cleaner' ? 'Cleaner' : 'Citizen';
   const roleImage = role === 'admin' ? '/canvas.png' : role === 'cleaner' ? '/trash.png' : '/citizen.webp';
@@ -35,6 +39,7 @@ export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
+  const [googleReady, setGoogleReady] = useState(false);
 
   function update(k, v) {
     setForm((s) => ({ ...s, [k]: v }));
@@ -81,6 +86,59 @@ export default function Register() {
     setForm((s) => ({ ...s, role: roleHint }));
     setRoleHint(roleHint);
   }, [roleHint, setRoleHint]);
+
+  useEffect(() => {
+    roleRef.current = role;
+  }, [role]);
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    if (!clientId) return;
+    if (googleInitRef.current) return;
+
+    function initializeGoogle() {
+      if (!window.google?.accounts?.id) return;
+      window.google.accounts.id.initialize({
+        client_id: clientId,
+        callback: async (response) => {
+          try {
+            const token = await loginWithGoogle(response.credential, roleRef.current);
+            loginWithToken(token.access_token);
+            const decoded = parseJwt(token.access_token);
+            const userRole = decoded?.role;
+            if (userRole === 'admin') nav('/admin');
+            else if (userRole === 'cleaner') nav('/cleaner');
+            else nav('/citizen');
+          } catch (ex) {
+            setErr(ex?.response?.data?.detail || 'Google sign-in failed');
+          }
+        },
+      });
+      if (googleBtnRef.current) {
+        window.google.accounts.id.renderButton(googleBtnRef.current, {
+          theme: 'outline',
+          size: 'large',
+          width: 320,
+        });
+        setGoogleReady(true);
+      }
+    }
+
+    if (window.google?.accounts?.id) {
+      initializeGoogle();
+      googleInitRef.current = true;
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = initializeGoogle;
+    script.onerror = () => setErr('Unable to load Google sign-in');
+    document.head.appendChild(script);
+    googleInitRef.current = true;
+  }, [loginWithToken, nav]);
 
   async function onSubmit(e) {
     e.preventDefault();
@@ -178,6 +236,19 @@ export default function Register() {
               <a href="mailto:trashio2025@gmail.com"> trashio2025@gmail.com</a> to request access.
             </div>
           )}
+          <div className="auth-social">
+            {role === 'admin' ? (
+              <div className="notice" role="status">
+                Google sign-in supports citizen and cleaner accounts. Use email/password for admin access.
+              </div>
+            ) : (
+              <div className="google-signin" ref={googleBtnRef} aria-hidden={!googleReady} />
+            )}
+            <div className="auth-divider">
+              <span>or register with email</span>
+            </div>
+          </div>
+
           <form onSubmit={onSubmit} className="auth-form-grid">
             <label className="span-2">
               Type of user

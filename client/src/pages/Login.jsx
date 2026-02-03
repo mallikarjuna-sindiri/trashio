@@ -149,6 +149,14 @@ export default function Login() {
             <h2>{heading}</h2>
             <p className="muted">Sign in to continue to your dashboard.</p>
           </div>
+
+          <div className="auth-social">
+            <div className="google-signin" ref={googleBtnRef} aria-hidden={!googleReady} />
+            <div className="auth-divider">
+              <span>or sign in with email</span>
+            </div>
+          </div>
+
           <form onSubmit={onSubmit}>
             <label>
               Type of user
@@ -195,10 +203,6 @@ export default function Login() {
             <button className="btn primary" disabled={busy} type="submit">
               {busy ? 'Signing in...' : 'Login'}
             </button>
-            <div className="auth-divider">
-              <span>or</span>
-            </div>
-            <div className="google-signin" ref={googleBtnRef} aria-hidden={!googleReady} />
             <div className="muted">
               New here? <Link to={role ? `/register?role=${role}` : '/register'}>Create account</Link>
             </div>
