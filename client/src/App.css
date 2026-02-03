@@ -1399,6 +1399,12 @@ textarea {
   padding: 18px;
 }
 
+.auth-page-login .auth-form .btn.primary {
+  width: min(60%, 260px);
+  margin: 0 auto;
+  display: block;
+}
+
 .auth-password-field {
   display: flex;
   align-items: center;
