@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import logging
 import smtplib
 from email.message import EmailMessage
 
 from app.core.config import settings
+
+logger = logging.getLogger("trashio.email")
 
 
 def send_reset_email(to_email: str, reset_link: str) -> None:
@@ -20,12 +23,17 @@ def send_reset_email(to_email: str, reset_link: str) -> None:
         "If you did not request this, you can ignore this email."
     )
 
-    with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as smtp:
-        if settings.smtp_use_tls:
-            smtp.starttls()
-        if settings.smtp_user and settings.smtp_password:
-            smtp.login(settings.smtp_user, settings.smtp_password)
-        smtp.send_message(msg)
+    try:
+        with smtplib.SMTP(settings.smtp_host, settings.smtp_port) as smtp:
+            if settings.smtp_use_tls:
+                smtp.starttls()
+            if settings.smtp_user and settings.smtp_password:
+                smtp.login(settings.smtp_user, settings.smtp_password)
+            smtp.send_message(msg)
+        logger.info("Reset email sent", extra={"to": to_email})
+    except Exception:
+        logger.exception("Failed to send reset email", extra={"to": to_email})
+        raise
 
 
 def send_welcome_email(to_email: str, full_name: str | None, role: str | None) -> None:
