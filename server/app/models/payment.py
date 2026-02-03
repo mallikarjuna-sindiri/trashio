@@ -17,6 +17,10 @@ class PaymentCreate(BaseModel):
     amount: float = Field(gt=0)
     payment_type: PaymentType
 
+    model_config = {
+        "arbitrary_types_allowed": True,
+    }
+
 
 class PaymentPublic(MongoModel):
     report_id: PyObjectId

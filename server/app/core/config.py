@@ -28,6 +28,11 @@ class Settings(BaseSettings):
     max_upload_mb: int = 8
     image_thumb_px: int = 640
 
+    ai_service_url: str = "http://localhost:9000"
+    ai_service_timeout: float = 10.0
+    citizen_reward_amount: float = 10.0
+    cleaner_payment_amount: float = 20.0
+
     @property
     def cors_origins_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]

@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from app.api.deps import DB, require_role
 from app.models.report import ReportPublic
+from app.services.ai_workflow import process_cleaning_verification
 from app.utils.uploads import save_upload_with_thumbnail
 
 router = APIRouter()
@@ -48,4 +49,5 @@ async def upload_after_image(
     )
 
     updated = await database.reports.find_one({"_id": rid})
-    return ReportPublic(**updated)
+    verified = await process_cleaning_verification(database, updated)
+    return ReportPublic(**(verified or updated))

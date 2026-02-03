@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, File, Form, UploadFile, status
 
 from app.api.deps import DB, require_role
 from app.models.report import ReportCreate, ReportPublic, report_doc_from_create
+from app.services.ai_workflow import process_new_report
 from app.utils.uploads import save_upload_with_thumbnail
 
 router = APIRouter()
@@ -27,7 +28,8 @@ async def create_report(
 
     result = await database.reports.insert_one(doc)
     created = await database.reports.find_one({"_id": result.inserted_id})
-    return ReportPublic(**created)
+    updated = await process_new_report(database, created)
+    return ReportPublic(**(updated or created))
 
 
 @router.get("/my", response_model=list[ReportPublic])

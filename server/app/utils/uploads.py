@@ -37,6 +37,13 @@ def validate_upload(file: UploadFile) -> None:
         return
 
 
+def path_from_upload_url(url: str) -> str:
+    if not url.startswith("/uploads/"):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid upload URL")
+    filename = url.removeprefix("/uploads/")
+    return f"{settings.upload_dir}/{filename}"
+
+
 async def save_upload_with_thumbnail(file: UploadFile, prefix: str) -> tuple[str, str]:
     validate_upload(file)
 
